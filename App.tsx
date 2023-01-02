@@ -1,20 +1,56 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, FlatList } from "react-native";
+import { db } from "./db/db";
+import Header from "./components/Header";
+import List from "./components/List";
+import InputTodo from "./components/InputTodo";
+import { useState } from "react";
 
-export default function App() {
+type Edit = {
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+};
+
+const App = () => {
+  const [todo, setTodo] = useState(db);
+  const [input, setInput] = useState<string>("");
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+
+  const handleEdit = (id: string, todos: string) => {
+    if (isEdit) {
+      alert("Selesaikan Edit Terlebih Dahulu");
+    } else {
+      setTodo(todo.filter((tod) => tod.id !== id));
+      setInput(todos);
+      setIsEdit(true);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View
+      style={{
+        marginTop: 40,
+        paddingHorizontal: 10,
+      }}
+    >
+      <FlatList
+        data={todo}
+        renderItem={({ item }) => (
+          <List item={item} setTodo={setTodo} handleEdit={handleEdit} />
+        )}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={
+          <>
+            <Header />
+            <InputTodo
+              setIsEdit={setIsEdit}
+              setTodo={setTodo}
+              input={input}
+              setInput={setInput}
+            />
+          </>
+        }
+      />
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
